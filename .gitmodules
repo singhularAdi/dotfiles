@@ -13,7 +13,7 @@
 	url = https://github.com/zplug/zplug
 [submodule "zsh/zgen"]
 	path = zsh/zgen
-	url = https://github.com/tarjoilija/zgen
+	url = https://github.com/jandamm/zgenom
 
 [submodule "zsh/is_mosh"]
 	path = zsh/is_mosh
