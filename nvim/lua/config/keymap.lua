@@ -89,3 +89,6 @@ cmap('<c-/>', function()
   end
   return ''
 end, { expr = true, desc = 'Toggle Ex command: exec <-> eval' })
+
+-- Add escape mode keybind
+vim.keymap.set('i', 'jk', '<Esc>')
