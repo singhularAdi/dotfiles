@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# claude-popup -- open or attach to a per-project Claude Code tmux session in a popup.
+#
+# Each project (git root or cwd) gets its own detached tmux session running
+# claude. The popup attaches to that session, so closing the popup leaves
+# the session — and the running claude process — alive in the background.
+#
+# Usage: claude-popup [--list | --kill] [working_dir]
+
+set -uo pipefail
+[ -n "${CLAUDE_POPUP_DEBUG:-}" ] && set -x
+
+action="attach"
+case "${1:-}" in
+    --list|-l) action="list"; shift ;;
+    --kill|-k) action="kill"; shift ;;
+    -h|--help)
+        sed -n '2,/^$/p' "$0" | sed 's/^# \?//'
+        exit 0 ;;
+esac
+
+cwd="${1:-$PWD}"
+project_root="$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null || echo "$cwd")"
+project_name="$(basename "$project_root")"
+project_slug="$(printf '%s' "$project_name" | tr -c '[:alnum:]_-' '-' | sed 's/^-*//;s/-*$//')"
+[ -z "$project_slug" ] && project_slug="root"
+hash="$(printf '%s' "$project_root" | md5sum | cut -c1-6)"
+session="claude-${project_slug}-${hash}"
+
+if [ "$action" = "list" ]; then
+    tmux list-sessions -F '#{session_name}' 2>/dev/null | grep '^claude-' || echo "no claude sessions"
+    exit 0
+fi
+if [ "$action" = "kill" ]; then
+    tmux kill-session -t "=$session" 2>/dev/null && echo "killed $session" || echo "no session for $project_root"
+    exit 0
+fi
+
+tmux has-session -t "=$session" 2>/dev/null || \
+    tmux new-session -d -s "$session" -c "$project_root" claude
+
+if [ -n "${TMUX:-}" ]; then
+    exec tmux display-popup -E -w 95% -h 95% -d "$project_root" \
+        "TMUX= tmux attach-session -t '=$session'"
+else
+    exec tmux attach-session -t "=$session"
+fi

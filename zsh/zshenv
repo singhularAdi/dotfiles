@@ -247,7 +247,7 @@ fpath=(
 # Python - Virtualenv, etc.
 #
 
-export PYTHONBREAKPOINT='pudb.set_trace'
+export PYTHONBREAKPOINT='ipdb.set_trace'
 
 if [[ "$(uname)" == "Darwin" ]]; then
     # Mac OS X: use python shipped by Homebrew for virtualenv.

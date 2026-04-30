@@ -15,9 +15,16 @@ alias c='command'
 alias ZQ='exit'
 alias QQ='exit'
 
-alias cp='nocorrect cp -ivp'
-alias mv='nocorrect mv -iv'
-alias rm='nocorrect rm -iv'
+if [[ -z "$CLAUDE" && "$TERM" != "dumb" ]]; then
+    alias cp='nocorrect cp -ivp'
+    alias mv='nocorrect mv -iv'
+    alias rm='nocorrect rm -iv'
+else
+    # Fallback for AI agents to prevent hanging
+    alias cp='nocorrect cp'
+    alias mv='nocorrect mv'
+    alias rm='nocorrect rm'
+fi
 
 # sudo, but inherits $PATH from the current shell
 alias sudoenv='sudo env PATH=$PATH'
